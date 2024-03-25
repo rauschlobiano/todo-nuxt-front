@@ -170,7 +170,7 @@
       userTodos: [],
       selectedUser: {},
       newTodo: {
-         description: null
+         description: ''
       },
       oldTodo: {}
       
@@ -179,7 +179,7 @@
    let notificationMessage = ref("");
    let notificationColor = ref("success");
 
-   //hooks -------------------------------------------------
+   //hooks -------------------------------------------------------
    onMounted(async () => {
       console.log("Index is mounted.")
       await getAllUsers();
@@ -216,18 +216,27 @@
    }
 
    const addTodo = async (description) => {
-      if(description) {
+      if(description.length > 0) {
          try {
+            // insert in-memory data first - spoofing the user/app
+            let now = new Date();
+            let tempTodo = {"id": now.getTime(),"description": description, "user_id": appData.selectedUser.id, isDone: false};
+            appData.userTodos.push(tempTodo);
 
+            //actual database query via graphql
             const res = await GqlCreateTodo(JSON.stringify({"description": description, "user_id": appData.selectedUser.id}));
             appData.newTodo.description = '';
             
             getUserTodos(appData.selectedUser.id);
-
+            console.log('TRUE: ', res);
+            showNotificationMessage("A Todo item has been added.", "success");
             return res;
          } catch(e) {
             console.log("Error while creating new Todo item.", e);
             showNotificationMessage("Sorry, an error occured while adding a new Todo item", "error");
+            //revert
+            let todoIndex = appData.userTodos.findIndex(t => t.id == tempTodo.id);
+            appData.userTodos.splice(todoIndex, 1);
             return null;
          }
       } else {
@@ -276,7 +285,7 @@
    }
 
 
-   //functions --------------------------------------------
+   //functions ---------------------------------------------------
 
    const setSelectedUser = (user) => {
       appData.selectedUser = user;
@@ -339,23 +348,17 @@
       //get the raw value before sending to API
       let newTodo = toRaw(appData.newTodo);
       let userID = toRaw(appData.selectedUser);
-
-      //insert in-memory data first
-      let now = new Date();
-      let tempTodo = {"id": now.getTime(),"description": newTodo.description, "user_id": appData.selectedUser.id, isDone: false};
-      appData.userTodos.push(tempTodo);
-
-      if(addTodo(newTodo.description, userID.id)) {
-         showNotificationMessage("A Todo item has been added.", "success");
-      } else {
-         //revert
-         let todoIndex = appData.userTodos.findIndex(t => t.id == tempTodo.id);
-         appData.userTodos.splice(todoIndex, 1);
-      }
+      
+      addTodo(newTodo.description, userID.id)
    }
 
    const handleDescriptionChange = (event) => {
       appData.newTodo.description = event.target.value
+
+      //when user presses Enter key, perform addNewTodo()
+      if(event.keyCode == 13) {
+         addNewTodo();
+      }
    }
 
    const deleteMultiple = (scope) => {
