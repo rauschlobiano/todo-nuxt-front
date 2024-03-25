@@ -12,10 +12,13 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "nuxt": "^3.11.1",
+    "nuxt-graphql-client": "^0.2.33",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
+    "graphql": "^16.8.1",
+    "sass": "^1.72.0",
     "vite-plugin-vuetify": "^2.0.3",
     "vuetify": "^3.5.11"
   }

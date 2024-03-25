@@ -1,0 +1,6 @@
+mutation CreateTodo($description: String!, $user_id: ID!){
+  createTodo(description: $description, user_id: $user_id) {
+    description,
+    isDone
+  }
+}

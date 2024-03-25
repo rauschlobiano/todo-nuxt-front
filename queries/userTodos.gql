@@ -1,0 +1,7 @@
+query userTodos($user_id: ID!){
+  todos(user_id:$user_id) {
+      id,
+      description,
+      isDone
+	}
+}

@@ -1,0 +1,21 @@
+query AllUsers{
+  users(first:10) {
+  	data {
+      id,
+      name,
+      email,
+      # todos {
+      #   id,
+      #   description,
+      #   isDone
+      # }
+   },
+    paginatorInfo {
+			count,
+      currentPage,
+      hasMorePages,
+      total
+   }
+    
+	}
+}

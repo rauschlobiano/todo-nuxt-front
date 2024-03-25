@@ -1,0 +1,6 @@
+mutation updateTodo($todo_id: ID!, $description: String, $isDone: Boolean){
+  updateTodo(id: $todo_id, description: $description, isDone: $isDone) {
+    description,
+    isDone
+  }
+}
