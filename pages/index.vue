@@ -27,19 +27,55 @@
                <v-card-title>
                   User Todos
                </v-card-title>
+               
                <v-card-text>
-                  <div v-if="appData.userTodos">
+                  <div v-if="appData.selectedUser.id">
+                     <v-row class="pr-2">
+                        <v-col>
+                           <v-btn v-if="appData.userTodos.length > 0" color="red" size="small" class="text-none float-right mr-2" @click="deleteMultiple()">
+                              <v-icon>mdi-delete</v-icon>
+                              All Tasks
+                           </v-btn>
+                           <v-btn v-if="appData.userTodos.filter(t => t.isDone == true).length > 0" color="red" size="small" 
+                              class="text-none float-right mr-1" @click="deleteMultiple('doneOnly')">
+                              <v-icon>mdi-delete</v-icon>
+                              Done
+                           </v-btn>
+                           <v-btn color="default" size="small" class="text-none float-right mr-6">
+                              Done
+                              <v-badge color="secondary" :content="appData.userTodos.filter(t => t.isDone == true).length" size="x-large">
+                                 <v-icon>mdi-calendar-check-outline</v-icon>
+                              </v-badge>
+                           </v-btn>
+                           <v-btn color="default" size="small" class="text-none float-right mr-1">
+                              Pending
+                              <v-badge color="success" :content="appData.userTodos.filter(t => t.isDone == false).length" size="x-large">
+                                 <v-icon>mdi-calendar-check-outline</v-icon>
+                              </v-badge>
+                           </v-btn>
+                           <v-btn color="default" size="small" class="text-none float-right mr-1">
+                              All Tasks
+                              <v-badge color="primary" :content="appData.userTodos.length" size="x-large">
+                                 <v-icon>mdi-calendar-check-outline</v-icon>
+                              </v-badge>
+                           </v-btn>
+
+                        </v-col>
+                     </v-row>
+                     
                      <v-text-field
                         v-model="appData.newTodo.description"
-                        class="pa-4"
-                        hint="Example: 'Find a good paying job to support the family's needs.'"
-                        label="Add a new Todo"
-                        variant="outlined"
+                        class="pa-6"
+                        hint="Example: 'Find a good paying job to support the family's everlasting needs.'"
+                        label="Type here to add a new Todo"
+                        color="primary"
+                        variant="underlined"
                         :append-inner-icon="appData.newTodo.description ? 'mdi-send' : 'mdi-cancel'"
                         persistent-hint
                         @click:append-inner="addNewTodo"
                         @keyup="handleDescriptionChange"
                      ></v-text-field>
+                     
                      <v-list density="compact" class="container-content">
                         <v-list-item v-for="userTodo in appData.userTodos" :key="userTodo.id">
                            <div class="todo-item" :class="userTodo.isDone ? 'is-done' : 'not-done'">
@@ -60,9 +96,10 @@
                                     density="compact"
                                     color="red"
                                     icon="mdi-delete"
+                                    @click="clickDelete(userTodo)"
                                  >
                                  </v-btn>
-                                 <v-btn 
+                                 <v-btn v-if="!userTodo.isDone"
                                     class="ma-3 float-right"
                                     density="compact"
                                     color="blue"
@@ -100,15 +137,30 @@
                      </v-list>
                   </div>
                   <div v-else>
-                     <h5>User has no Todos.</h5>
+                     <h5>Select a User from the sidebar.</h5>
                   </div>
                </v-card-text>
             </v-card>
          </v-col>
       </v-row>
       <div v-else>
-         <h3>No Data to load</h3>
+         <h3>No Users data to load</h3>
       </div>
+      <v-snackbar
+         v-model="showNotification"
+         :color="notificationColor" 
+      >
+         {{notificationMessage}}
+         <template v-slot:actions>
+            <v-btn
+               color="white"
+               variant="text"
+               @click="showNotification = false"
+            >
+               Close
+            </v-btn>
+         </template>
+      </v-snackbar>
    </div>
 </template>
 <script setup>
@@ -119,20 +171,21 @@
       selectedUser: {},
       newTodo: {
          description: null
-      }
-   })
-   let editFlag = ref(false);
+      },
+      oldTodo: {}
+      
+   });
+   let showNotification = ref(false);
+   let notificationMessage = ref("");
+   let notificationColor = ref("success");
 
-   //no need to be reactive
-   let origDescription = '';
-
-   //hooks --------------------------------------------
+   //hooks -------------------------------------------------
    onMounted(async () => {
       console.log("Index is mounted.")
       await getAllUsers();
    })
    
-   //queries ------------------------------------------
+   //graphql queries ----------------------------------------------
    const getAllUsers = async () => {
       console.log('Getting all users.')
       try {
@@ -142,6 +195,7 @@
          }
       } catch(e) {
          console.log("Error while getting all users.", e)
+         showNotificationMessage("Sorry, an error occured while getting all Users", "error");
       }
    }
    const getUserTodos = async (user_id) => {
@@ -157,89 +211,188 @@
          }
       } catch(e) {
          console.log("Error while getting user todos.", e)
+         showNotificationMessage("Sorry, an error occured while getting all Todos", "error");
       }
    }
 
    const addTodo = async (description) => {
       if(description) {
          try {
+
             const res = await GqlCreateTodo(JSON.stringify({"description": description, "user_id": appData.selectedUser.id}));
-            
-            console.log('Res: ', res);
-            getUserTodos(appData.selectedUser.id);
             appData.newTodo.description = '';
+            
+            getUserTodos(appData.selectedUser.id);
+
+            return res;
          } catch(e) {
-            console.log("Error while creating new todo.", e)
+            console.log("Error while creating new Todo item.", e);
+            showNotificationMessage("Sorry, an error occured while adding a new Todo item", "error");
+            return null;
          }
       } else {
-         console.log('Description and User ID must have a value.')
+         console.log('Description and User ID must have a value.');
+         showNotificationMessage("Please input Todo description", "warning");
       }
    }
 
+   const updateTodo = async (data) => {
+      let todo = toRaw(data);
+      if(todo) {
+         try {
+            const res = await GqlUpdateTodo(JSON.stringify({"todo_id": todo.id, "description": todo.description, "isDone" : todo.isDone}));
+            
+            return res;
+         } catch(e) {
+            console.log("Error while editing todo.", e);
+            showNotificationMessage("Sorry, an error occured while updating a Todo item", "error");
+            return null;
+         }
+      } else {
+         console.log('Data is empty.')
+      }
+   }
+
+   const deleteTodo = async (data) => {
+      let todo = toRaw(data);
+      if(todo) {
+         try {
+            //keep a copy of the old todo
+            appData.oldTodo = todo;
+            
+            const res = await GqlDeleteTodo(JSON.stringify({"todo_id": todo.id}));
+
+            return res;
+         } catch(e) {
+            console.log("Error while deleting todo.", e);
+            //restore the old copy
+            appData.userTodos.push(appData.oldTodo);
+            showNotificationMessage("Sorry, an error occured while deleting a Todo item", "error");
+            return null;
+         }
+      } else {
+         console.log('Data is empty.')
+      }
+   }
+
+
+   //functions --------------------------------------------
+
+   const setSelectedUser = (user) => {
+      appData.selectedUser = user;
+      getUserTodos(user.id);
+   }
+
    const clickEdit = (todo) => {
-      console.log('Start editing')
       todo.editFlag = true;
+      
+      //keep a copy of the original for error purposes
+      appData.oldTodo = todo;
+      
       //store the original description just in case the user cancels the edit
       todo.origDescription = todo.description;
    }
 
    const clickCancelEdit = (todo) => {
-      console.log('Cancel editing');
+      //revert
       todo.description = todo.origDescription;
+
       todo.editFlag = false;
    }
 
    const clickSaveEdit = (todo) => {
-      console.log('Save editing')
       //query
-      updateTodo(todo);
-
-      todo.editFlag = false;
+      if(updateTodo(todo)){
+         todo.editFlag = false;
+         showNotificationMessage("A Todo item has been updated.", "success");
+      } else {
+         //revert
+         todo.description = todo.origDescription;
+      }
    }
 
    const clickUpdateTodoStatus = (todo) => {
       //update in-memory data first
       todo.isDone = !todo.isDone;
-      // let todoIndex = appData.userTodos.findIndex(t => t.id == todo.id);
-      // appData.userTodos[todoIndex].isDone = !todo.isDone;
-      
       //query
-      updateTodo(todo);
-   }
-
-   const updateTodo = async (data) => {
-      // then update database
-      let todo = toRaw(data);
-      if(todo) {
-         try {
-            const res = await GqlUpdateTodo(JSON.stringify({"todo_id": todo.id, "description": todo.description, "isDone" : todo.isDone}));
-            console.log('Res: ', res);
-         } catch(e) {
-            console.log("Error while editing todo.", e)
-         }
+      if(updateTodo(todo)) {
+         showNotificationMessage("A Todo item has been updated.", "success");
       } else {
-         console.log('Description and User ID must have a value.')
+         //revert back the change
+         todo.isDone = !todo.isDone;
       }
    }
 
-   //functions ----------------------------------------
+   const clickDelete = (todo) => {
+      //delete in-memory data first
+      let todoIndex = appData.userTodos.findIndex(t => t.id == todo.id);
+      appData.userTodos.splice(todoIndex, 1);
 
-   const setSelectedUser = (user) => {
-      console.log('setSelectedUser', user);
-      appData.selectedUser = user;
-      getUserTodos(user.id);
+      if(deleteTodo(todo)) {
+         showNotificationMessage("A Todo item has been deleted.", "success");
+      }
+      //the revert is inside the deleteTodo()
    }
 
-   const addNewTodo = async () => {
+
+   const addNewTodo = () => {
       //get the raw value before sending to API
-      let newTodo = toRaw(appData.newTodo)
-      let userID = toRaw(appData.selectedUser)
-      console.log('Add new', newTodo);
-      await addTodo(newTodo.description, userID.id);
+      let newTodo = toRaw(appData.newTodo);
+      let userID = toRaw(appData.selectedUser);
+
+      //insert in-memory data first
+      let now = new Date();
+      let tempTodo = {"id": now.getTime(),"description": newTodo.description, "user_id": appData.selectedUser.id, isDone: false};
+      appData.userTodos.push(tempTodo);
+
+      if(addTodo(newTodo.description, userID.id)) {
+         showNotificationMessage("A Todo item has been added.", "success");
+      } else {
+         //revert
+         let todoIndex = appData.userTodos.findIndex(t => t.id == tempTodo.id);
+         appData.userTodos.splice(todoIndex, 1);
+      }
    }
+
    const handleDescriptionChange = (event) => {
       appData.newTodo.description = event.target.value
    }
+
+   const deleteMultiple = (scope) => {
+      //get raw copy
+      let userTodosRaw = toRaw(appData.userTodos);
+
+      //delete only todos with isDone is true
+      if(scope == 'doneOnly') {
+         let toDelete = userTodosRaw.filter(t => t.isDone == true);
+         //spoof delete
+         appData.userTodos = userTodosRaw.filter(t => t.isDone == false);
+
+         //actual delete
+         toDelete.forEach(todo => {
+            deleteTodo(todo);
+         });
+
+         showNotificationMessage("Done Todos have been deleted.", "success");
+      } else {
+         //spoof delete all
+         appData.userTodos = [];
+         //delete all
+         userTodosRaw.forEach(todo => {
+            deleteTodo(todo);
+         });
+
+         showNotificationMessage("All Todos have been deleted.", "success");
+      }
+      getUserTodos(appData.selectedUser.id);
+   }
+
+   const showNotificationMessage = (errorMsg, color) => {
+      notificationMessage.value = errorMsg;
+      notificationColor.value = color;
+      showNotification.value = true;
+   }
+
 </script>
 <style lang="scss" scoped>
    .main-page {
