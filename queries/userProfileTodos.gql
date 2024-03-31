@@ -1,0 +1,7 @@
+query profileTodos($user_id: ID!) {
+  profileTodos(user_id:$user_id) {
+    id,
+    description,
+    isDone
+  }
+}

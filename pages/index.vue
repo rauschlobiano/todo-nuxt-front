@@ -1,7 +1,27 @@
 <template>
    <div class="main-page">
       <v-app-bar :elevation="2" rounded >
-         <v-app-bar-title>Simple Todo App</v-app-bar-title>
+         <v-app-bar-title>
+               Simple Todo App
+            <v-btn
+               append-icon="mdi-account-lock"
+               prepend-icon="mdi-arrow-right-bold-circle"
+               class="float-right ma-2"
+               variant="elevated"
+               elevation=3
+               @click="handleUserLoginPageBtn"
+            >
+               <template v-slot:prepend>
+               <v-icon color="success"></v-icon>
+               </template>
+
+               USER LOGIN PAGE
+
+               <template v-slot:append>
+               <v-icon color="warning"></v-icon>
+               </template>
+            </v-btn>
+         </v-app-bar-title>
       </v-app-bar>
       <v-row v-if="appData.users" class="todo-container">
          <v-col cols="4">
@@ -110,10 +130,12 @@
                               </span>
                               <span v-if="userTodo.editFlag" class="d-flex">
                                  <v-text-field
+                                    ref="inputEditDescription"
                                     class="ms-4"
                                     v-model="userTodo.description"
                                     color="primary"
                                     variant="underlined"
+                                    @keyup="handleEditDescriptionChange($event, userTodo)"
                                  ></v-text-field>
                                  <v-btn 
                                     class="ma-3 float-right"
@@ -361,6 +383,12 @@
       }
    }
 
+   const handleEditDescriptionChange = (event, todo) => {
+      if(event.keyCode == 13) {
+         clickSaveEdit(todo);
+      }
+   }
+
    const deleteMultiple = (scope) => {
       //get raw copy
       let userTodosRaw = toRaw(appData.userTodos);
@@ -396,43 +424,8 @@
       showNotification.value = true;
    }
 
+   const handleUserLoginPageBtn = () => {
+      navigateTo('/login');
+   }
+
 </script>
-<style lang="scss" scoped>
-   .main-page {
-      background: radial-gradient(circle at top, #268253 , #80cb8d);
-      height: 100%;
-   }
-   .todo-container {
-      margin-top: 80px;
-      height: 80%;
-   }
-   .left-container {
-      margin-left: 20px;
-      height: 100%;
-
-   }
-   .right-container {
-      margin-right: 20px;
-      height: 100%;
-   }
-
-   .container-content {
-      max-height: 500px;
-      overflow-x: hidden;
-      overflow-y: auto;
-   }
-   .todo-item {
-      border-radius: 10px;
-      background: transparent !important;
-   }
-   .is-done {
-      color: gray;
-      text-decoration: line-through;
-      border: 2px solid lightgray;
-   }
-   .not-done {
-      color: darkgreen;
-      text-decoration: none;
-      border: 2px solid lightgreen;
-   }
-</style>

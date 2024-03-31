@@ -17,6 +17,7 @@ export default defineNuxtConfig({
       })
     },
     'nuxt-graphql-client',
+    // '@sidebase/nuxt-auth',
   ],
 
   vite: {
@@ -32,6 +33,20 @@ export default defineNuxtConfig({
     autoImport: true,
     functionPrefix: 'Gql',
     documentPaths: ['./queries/'],
-    preferGETQueries: false
+    preferGETQueries: false,
+    clients: {
+      default: {
+        host: 'localhost:8000',
+        headers: {
+          credentials: 'same-origin',
+        }
+      }
   }
+  },
+
+  // 'auth': {
+  //   provider: {
+  //       type: 'authjs'
+  //   }
+  // }
 })

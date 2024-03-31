@@ -1,0 +1,6 @@
+mutation createProfileTodo($description: String!, $user_id: ID!){
+  createProfileTodo(description: $description, user_id: $user_id) {
+    description,
+    isDone
+  }
+}

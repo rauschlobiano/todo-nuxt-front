@@ -1,0 +1,5 @@
+mutation deleteProfileTodo($todo_id: ID!){
+  deleteProfileTodo(id: $todo_id) {
+    id, description
+  }
+}

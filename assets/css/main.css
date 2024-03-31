@@ -1,3 +1,49 @@
 body {
    zoom: 100%;
 }
+
+.main-page {
+   background: radial-gradient(circle at top, #268253 , #80cb8d);
+   height: 100%;
+}
+
+.todo-container {
+   padding-top: 80px;
+   height: 80%;
+}
+.left-container {
+   margin-left: 20px;
+   height: 100%;
+
+}
+.right-container {
+   margin-right: 20px;
+   height: 100%;
+}
+
+.container-content {
+   max-height: 500px;
+   overflow-x: hidden;
+   overflow-y: auto;
+}
+
+.todos-content {
+   max-height: calc(100vh - 200px);
+   overflow-x: hidden;
+   overflow-y: auto;
+}
+
+.todo-item {
+   border-radius: 10px;
+   background: transparent !important;
+}
+.is-done {
+   color: gray;
+   text-decoration: line-through;
+   border: 2px solid lightgray;
+}
+.not-done {
+   color: darkgreen;
+   text-decoration: none;
+   border: 2px solid lightgreen;
+}
