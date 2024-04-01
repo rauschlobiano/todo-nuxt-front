@@ -17,7 +17,8 @@
     "nuxt-graphql-client": "^0.2.33",
     "nuxt-storage": "^1.2.2",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "@rollup/rollup-linux-x64-gnu": "^4.9.2"
   },
   "devDependencies": {
     "@sidebase/nuxt-auth": "^0.7.0",
