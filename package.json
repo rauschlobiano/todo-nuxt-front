@@ -5,6 +5,8 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "start": "node src/index.js",
+    "main": "src/index.js",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"

@@ -3,6 +3,15 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 export default defineNuxtConfig({
   devtools: { enabled: true },
+  devServer: {
+    host: '0.0.0.0',
+    port: 1111
+  },
+  runtimeConfig: {
+    public: {
+      baseURL: process.env.GQL_HOST || 'http://3.107.47.74/graphql',
+    },
+  },  
   css: ['~/assets/css/main.css'],
 
   build: {
