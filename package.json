@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "main": "nuxt build",
+    "build": "nuxt build",
     "dev": "nuxt dev",
-    "start": "node src/index.js",
+    "start": "node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
