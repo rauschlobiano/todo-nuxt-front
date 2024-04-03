@@ -61,19 +61,19 @@
                               <v-icon>mdi-delete</v-icon>
                               Done
                            </v-btn>
-                           <v-btn color="default" size="small" class="text-none float-right mr-6">
+                           <v-btn color="default" size="small" class="text-none float-right mr-6" @click="showDoneTodosOnly">
                               Done
                               <v-badge color="secondary" :content="appData.userTodos.filter(t => t.isDone == true).length" size="x-large">
                                  <v-icon>mdi-calendar-check-outline</v-icon>
                               </v-badge>
                            </v-btn>
-                           <v-btn color="default" size="small" class="text-none float-right mr-1">
+                           <v-btn color="default" size="small" class="text-none float-right mr-1" @click="showPendingTodosOnly">
                               Pending
                               <v-badge color="success" :content="appData.userTodos.filter(t => t.isDone == false).length" size="x-large">
                                  <v-icon>mdi-calendar-check-outline</v-icon>
                               </v-badge>
                            </v-btn>
-                           <v-btn color="default" size="small" class="text-none float-right mr-1">
+                           <v-btn color="default" size="small" class="text-none float-right mr-1" @click="showAllTodos">
                               All Tasks
                               <v-badge color="primary" :content="appData.userTodos.length" size="x-large">
                                  <v-icon>mdi-calendar-check-outline</v-icon>
@@ -97,7 +97,7 @@
                      ></v-text-field>
                      
                      <v-list density="compact" class="container-content">
-                        <v-list-item v-for="userTodo in appData.userTodos" :key="userTodo.id">
+                        <v-list-item v-for="userTodo in appData.userTodosCopy" :key="userTodo.id">
                            <div class="todo-item" :class="userTodo.isDone ? 'is-done' : 'not-done'">
                               <span v-if="!userTodo.editFlag" class="flex-row">
                                  <v-btn 
@@ -190,6 +190,7 @@
    let appData = reactive({
       users: [],
       userTodos: [],
+      userTodosCopy: [],
       selectedUser: {},
       newTodo: {
          description: ''
@@ -205,8 +206,11 @@
    onMounted(async () => {
       console.log("Index is mounted.")
       await getAllUsers();
-   })
-   
+   });
+
+   onUpdated(() => {
+      console.log('UI is updated...')
+   });
    //graphql queries ----------------------------------------------
    const getAllUsers = async () => {
       console.log('Getting all users.')
@@ -230,6 +234,7 @@
                todo.editFlag = false;
             });
             appData.userTodos = todos;
+            appData.userTodosCopy = todos;
          }
       } catch(e) {
          console.log("Error while getting user todos.", e)
@@ -312,6 +317,18 @@
    const setSelectedUser = (user) => {
       appData.selectedUser = user;
       getUserTodos(user.id);
+   }
+
+   const showPendingTodosOnly = () => {
+      appData.userTodosCopy = appData.userTodos.filter(t => t.isDone == false);
+   }
+
+   const showDoneTodosOnly = () => {
+      appData.userTodosCopy = appData.userTodos.filter(t => t.isDone == true);
+   }
+
+   const showAllTodos = () => {
+      appData.userTodosCopy = appData.userTodos;
    }
 
    const clickEdit = (todo) => {
