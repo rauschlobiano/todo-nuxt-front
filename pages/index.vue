@@ -15,7 +15,25 @@
                <v-icon color="success"></v-icon>
                </template>
 
-               USER LOGIN PAGE
+               LOGIN
+
+               <template v-slot:append>
+               <v-icon color="warning"></v-icon>
+               </template>
+            </v-btn>
+            <v-btn
+               append-icon="mdi-account-lock"
+               prepend-icon="mdi-arrow-right-bold-circle"
+               class="float-right ma-2"
+               variant="elevated"
+               elevation=3
+               @click="handleUserRegistrationPageBtn"
+            >
+               <template v-slot:prepend>
+               <v-icon color="success"></v-icon>
+               </template>
+
+               REGISTRATION
 
                <template v-slot:append>
                <v-icon color="warning"></v-icon>
@@ -95,7 +113,11 @@
                         @click:append-inner="addNewTodo"
                         @keyup="handleDescriptionChange"
                      ></v-text-field>
-                     
+                     <v-row>
+                        <v-col class="ms-4">
+                           <h4>Showing {{filterApplied}}</h4>
+                        </v-col>
+                     </v-row>
                      <v-list density="compact" class="container-content">
                         <v-list-item v-for="userTodo in appData.userTodosCopy" :key="userTodo.id">
                            <div class="todo-item" :class="userTodo.isDone ? 'is-done' : 'not-done'">
@@ -186,6 +208,9 @@
    </div>
 </template>
 <script setup>
+   import Echo from 'laravel-echo';
+   import Pusher from 'pusher-js';
+
    //data --------------------------------------------
    let appData = reactive({
       users: [],
@@ -200,10 +225,31 @@
    });
    let showNotification = ref(false);
    let notificationMessage = ref("");
+   let filterApplied = ref("All Todos");
    let notificationColor = ref("success");
 
    //hooks -------------------------------------------------------
    onMounted(async () => {
+      // Pusher;
+      // try{
+      //    console.log('Setting up listener.');
+      //    let echo = new Echo({
+      //       broadcaster: 'pusher',
+      //       key: 'd6f4222c2fc83590e257',
+      //       wsHost: 'localhost',
+      //       wsPort: 8000,
+      //       cluster: 'ap1',
+      //       forceTLS: false
+      //    });
+
+      //    echo.channel('todos').listen('.todos.updated', (res) => {
+      //       console.log('From Echo: todoUpdated', res);
+      //    });
+      // } catch(e) {
+      //    console.log('error in echo: ', e);
+      // }
+      
+
       console.log("Index is mounted.")
       await getAllUsers();
    });
@@ -321,14 +367,18 @@
 
    const showPendingTodosOnly = () => {
       appData.userTodosCopy = appData.userTodos.filter(t => t.isDone == false);
+      filterApplied.value = "Pending Todos";
    }
 
    const showDoneTodosOnly = () => {
       appData.userTodosCopy = appData.userTodos.filter(t => t.isDone == true);
+      filterApplied.value = "Done Todos";
+
    }
 
    const showAllTodos = () => {
       appData.userTodosCopy = appData.userTodos;
+      filterApplied.value = "All Todos";
    }
 
    const clickEdit = (todo) => {
@@ -443,6 +493,10 @@
 
    const handleUserLoginPageBtn = () => {
       navigateTo('/login');
+   }
+
+   const handleUserRegistrationPageBtn = () => {
+      navigateTo('/register');
    }
 
 </script>
