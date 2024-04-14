@@ -2,7 +2,7 @@
    <div class="main-page">
       <div class="d-flex align-center flex-column mt-6">
          <v-card width="400" class="p-6">
-            <v-card-item>
+            <v-card-item class="mb-6">
             <v-card-title>User Registration</v-card-title>
 
             <v-card-subtitle>Fill up the form.</v-card-subtitle>
@@ -23,7 +23,7 @@
                   <v-text-field
                   type="password"
                   v-model="userCreds.password"
-                  label="Password (Default is 'password')"
+                  label="Password"
                   ></v-text-field>
 
                   <v-btn class="mt-2" type="submit" block @click="tryRegister">Register</v-btn>

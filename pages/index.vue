@@ -1,5 +1,6 @@
 <template>
    <div class="main-page">
+
       <v-app-bar :elevation="2" rounded >
          <v-app-bar-title>
                Simple Todo App
@@ -205,11 +206,13 @@
             </v-btn>
          </template>
       </v-snackbar>
+
    </div>
 </template>
-<script setup>
-   import Echo from 'laravel-echo';
-   import Pusher from 'pusher-js';
+<script setup >
+   // import Echo from 'laravel-echo';
+   // import Pusher from 'pusher-js';
+   const { testing } = gqlUtils();
 
    //data --------------------------------------------
    let appData = reactive({
@@ -230,6 +233,7 @@
 
    //hooks -------------------------------------------------------
    onMounted(async () => {
+      testing();
       // Pusher;
       // try{
       //    console.log('Setting up listener.');

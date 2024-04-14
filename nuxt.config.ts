@@ -2,11 +2,13 @@
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 export default defineNuxtConfig({
-  devtools: { enabled: true },
-  css: ['~/assets/css/main.css'],
 
+  devtools: { enabled: true },
+
+  css: ['~/assets/css/main.css'],
+  
   build: {
-    transpile: ['vuetify'],
+    transpile: ['vuetify', '@nuxtjs/laravel-echo',],
   },
 
   modules: [
@@ -17,8 +19,15 @@ export default defineNuxtConfig({
       })
     },
     'nuxt-graphql-client',
+    'nuxt-particles'
     // '@sidebase/nuxt-auth',
   ],
+
+  nitro: {
+    experimental: {
+      websocket: true,
+    }
+  },
 
   vite: {
     vue: {
@@ -41,9 +50,17 @@ export default defineNuxtConfig({
           credentials: 'same-origin',
         }
       }
-  }
+    }
   },
 
+  particles: {
+    mode: 'full', // 'full' | 'slim' | 'basic' | 'custom'
+    lazy: true
+  },
+  
+  plugins: [
+    {src: '~/plugins/echo', ssr: false}
+  ],
   // 'auth': {
   //   provider: {
   //       type: 'authjs'

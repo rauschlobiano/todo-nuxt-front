@@ -15,12 +15,15 @@
     "nuxt": "^3.11.1",
     "nuxt-graphql-client": "^0.2.33",
     "nuxt-storage": "^1.2.2",
+    "pusher-js": "^8.4.0-rc2",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
+    "@nuxtjs/laravel-echo": "^1.1.0",
     "@sidebase/nuxt-auth": "^0.7.0",
     "graphql": "^16.8.1",
+    "nuxt-particles": "^0.3.0",
     "sass": "^1.72.0",
     "vite-plugin-vuetify": "^2.0.3",
     "vuetify": "^3.5.11"
